@@ -1,1 +1,397 @@
-<p>emi-schedule works!</p>
+
+<div class="emi-page container-fluid">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h2>EMI Schedule</h2>
+      <p>Manage your installments and track repayments</p>
+    </div>
+
+    <span class="account-badge">
+      <i class="bi bi-wallet2"></i>
+      Loan Account #{{ loanAccountId }}
+    </span>
+  </div>
+
+  <!-- Overall Summary Cards -->
+  <div class="row g-3 summary-grid">
+
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="summary-card">
+        <span>Total Loan Amount</span>
+        <h3>
+          {{ totalLoanAmount | currency:'INR':'symbol':'1.2-2' }}
+        </h3>
+        <small>Original loan principal</small>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="summary-card blue">
+        <span>Outstanding Principal</span>
+        <h3>
+          {{ outstandingPrincipal | currency:'INR':'symbol':'1.2-2' }}
+        </h3>
+        <small>Remaining principal across the loan</small>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="summary-card green">
+        <span>Paid Installments</span>
+        <h3>{{ paidCount }} / {{ overallTotalElements }}</h3>
+        <small>Paid installments across the entire schedule</small>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="summary-card amber">
+        <span>Next Upcoming EMI</span>
+
+        <h3>
+          {{ emiAmount | currency:'INR':'symbol':'1.2-2' }}
+        </h3>
+
+        <small *ngIf="nextEmi">
+          Installment #{{ nextEmi.installmentNo }}
+          · Due {{ formatDate(nextEmi.dueDate) }}
+        </small>
+
+        <small *ngIf="!nextEmi">
+          No upcoming pending EMI
+        </small>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- EMI Schedule Table -->
+  <div class="schedule-panel">
+
+    <div class="panel-header">
+      <div>
+        <h4>Installment Schedule</h4>
+        <p>Review your payment plan and installment status</p>
+      </div>
+    </div>
+
+    <div class="alert alert-success" *ngIf="successMessage">
+      {{ successMessage }}
+    </div>
+
+    <div class="alert alert-danger" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Loading -->
+    <!-- <div class="loading-state" *ngIf="loading">
+      <div class="spinner-border text-primary"></div>
+      <p>Loading EMI schedule...</p>
+    </div> -->
+
+
+    <div *ngIf="loading" class="loading-container">
+  <p>Loading EMI schedule...</p>
+</div>
+
+<div *ngIf="errorMessage" class="alert alert-danger">
+  {{ errorMessage }}
+</div>
+
+<div
+  *ngIf="!loading && !errorMessage && emiSchedules.length === 0"
+  class="empty-state"
+>
+  <p>No EMI records found.</p>
+</div>
+
+    <!-- Table -->
+    <div class="table-responsive" *ngIf="!loading">
+
+      <table class="table emi-table align-middle">
+
+        <thead>
+          <tr>
+            <th>Installment</th>
+            <th>Due Date</th>
+            <th>EMI Amount</th>
+            <th>Principal / Interest</th>
+            <th>Opening / Closing</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr *ngFor="let emi of emiSchedules; trackBy: trackByEmiId">
+
+            <td>
+              <span class="installment-badge">
+                #{{ emi.installmentNo }}
+              </span>
+            </td>
+
+            <td class="due-date">
+              {{ formatDate(emi.dueDate) }}
+            </td>
+
+            <td class="amount">
+              {{
+                (emi.emiAmount ?? emi.emi)
+                | currency:'INR':'symbol':'1.2-2'
+              }}
+            </td>
+
+            <td>
+              <div class="amount">
+                {{
+                  emi.principalAmount
+                  | currency:'INR':'symbol':'1.2-2'
+                }}
+              </div>
+
+              <small class="muted">
+                Interest:
+                {{
+                  emi.interestAmount
+                  | currency:'INR':'symbol':'1.2-2'
+                }}
+              </small>
+            </td>
+
+            <td>
+              <div>
+                {{
+                  emi.openingBalance
+                  | currency:'INR':'symbol':'1.2-2'
+                }}
+              </div>
+
+              <small class="muted">
+                Closing:
+                {{
+                  emi.closingBalance
+                  | currency:'INR':'symbol':'1.2-2'
+                }}
+              </small>
+            </td>
+
+            <td>
+              <span
+                class="status-badge"
+                [ngClass]="{
+                  'paid': getStatus(emi) === 'PAID',
+                  'pending': getStatus(emi) === 'PENDING',
+                  'overdue': getStatus(emi) === 'OVERDUE',
+                  'cancelled': getStatus(emi) === 'CANCELLED'
+                }">
+
+                <i
+                  class="bi"
+                  [ngClass]="{
+                    'bi-check-circle-fill': getStatus(emi) === 'PAID',
+                    'bi-clock-fill': getStatus(emi) === 'PENDING',
+                    'bi-exclamation-circle-fill': getStatus(emi) === 'OVERDUE',
+                    'bi-x-circle-fill': getStatus(emi) === 'CANCELLED'
+                  }">
+                </i>
+
+                {{ getStatus(emi) }}
+              </span>
+
+              <small
+                class="paid-date d-block"
+                *ngIf="getStatus(emi) === 'PAID' && emi.paidDate">
+
+                Paid {{ emi.paidDate | date:'dd MMM yyyy' }}
+              </small>
+            </td>
+
+            <td>
+              <div
+                class="action-buttons"
+                *ngIf="
+                  getStatus(emi) === 'PENDING' ||
+                  getStatus(emi) === 'OVERDUE'
+                ">
+
+                <button
+                  type="button"
+                  class="btn btn-sm btn-primary"
+                  (click)="payNow(emi)">
+
+                  Pay Now
+                </button>
+
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-secondary"
+                  title="View breakdown"
+                  (click)="openBreakdown(emi)">
+
+                  <i class="bi bi-receipt"></i>
+                </button>
+              </div>
+
+              <button
+                type="button"
+                *ngIf="getStatus(emi) === 'PAID'"
+                class="btn btn-sm btn-outline-success"
+                (click)="downloadReceipt(emi)">
+
+                <i class="bi bi-download"></i>
+                Receipt
+              </button>
+            </td>
+
+          </tr>
+
+          <tr *ngIf="emiSchedules.length === 0">
+            <td colspan="7" class="empty-state">
+              No installments found.
+            </td>
+          </tr>
+
+        </tbody>
+
+      </table>
+    </div>
+
+    
+
+<div class="pagination-container" *ngIf="totalPages > 0">
+
+  <div class="pagination-info">
+    {{ totalElements }} total records
+  </div>
+
+  <div class="pagination-controls">
+
+    <button
+      type="button"
+      (click)="changePage(currentPage - 1)"
+      [disabled]="loading || currentPage <= 0">
+      Previous
+    </button>
+
+    <span class="page-number">
+      Page {{ currentPage + 1 }} of {{ totalPages }}
+    </span>
+
+    <button
+      type="button"
+      (click)="changePage(currentPage + 1)"
+      [disabled]="loading || currentPage >= totalPages - 1">
+      Next
+    </button>
+
+  </div>
+</div>
+
+  </div>
+
+  <!-- EMI Breakdown Modal -->
+  <div class="modal-backdrop-custom" *ngIf="selectedEmi">
+
+    <div class="breakdown-modal">
+
+      <div class="modal-heading">
+        <div>
+          <h4>EMI Breakdown</h4>
+          <p>Installment #{{ selectedEmi.installmentNo }}</p>
+        </div>
+
+        <button
+          type="button"
+          class="close-btn"
+          (click)="closeBreakdown()">
+
+          &times;
+        </button>
+      </div>
+
+      <div *ngIf="modalLoading" class="text-center py-4">
+        <div class="spinner-border text-primary"></div>
+        <p>Loading breakdown...</p>
+      </div>
+
+      <div *ngIf="!modalLoading">
+
+        <div class="breakdown-row">
+          <span>Base EMI</span>
+          <strong>
+            {{
+              (breakdown?.emiAmount ??
+               breakdown?.emi ??
+               selectedEmi.emiAmount ??
+               selectedEmi.emi)
+              | currency:'INR':'symbol':'1.2-2'
+            }}
+          </strong>
+        </div>
+
+        <div class="breakdown-row">
+          <span>Principal</span>
+          <span>
+            {{
+              selectedEmi.principalAmount
+              | currency:'INR':'symbol':'1.2-2'
+            }}
+          </span>
+        </div>
+
+        <div class="breakdown-row">
+          <span>Interest</span>
+          <span>
+            {{
+              selectedEmi.interestAmount
+              | currency:'INR':'symbol':'1.2-2'
+            }}
+          </span>
+        </div>
+
+        <div class="breakdown-row">
+          <span>Bounce Charges</span>
+          <span>
+            {{
+              (breakdown?.bounceCharges ??
+               breakdown?.bounceCharge ?? 0)
+              | currency:'INR':'symbol':'1.2-2'
+            }}
+          </span>
+        </div>
+
+        <div class="breakdown-row">
+          <span>Daily Late Fee</span>
+          <span>
+            {{
+              (breakdown?.dailyLateFee ??
+               breakdown?.lateFee ?? 0)
+              | currency:'INR':'symbol':'1.2-2'
+            }}
+          </span>
+        </div>
+
+        <div class="total-row">
+          <span>Total Payable</span>
+          <strong>
+            {{ totalPayable | currency:'INR':'symbol':'1.2-2' }}
+          </strong>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-primary w-100 mt-4"
+          (click)="proceedToPayment()">
+
+          Proceed to Razorpay Payment
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>

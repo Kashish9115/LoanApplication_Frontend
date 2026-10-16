@@ -1,1 +1,65 @@
-<p>payment-history works!</p>
+<div class="payment-container">
+
+  <div class="page-header">
+    <h2>Payment History</h2>
+    <p>View your loan payment transactions</p>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Payment ID</th>
+          <th>Loan Account ID</th>
+          <th>Paid Amount</th>
+          <th>Payment Status</th>
+          <th>Payment Date</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let payment of payments">
+          <td>{{ payment.paymentId }}</td>
+          <td>{{ payment.loanAccountId }}</td>
+          <td class="amount-cell">
+            ₹ {{ payment.paymentAmount | number:'1.2-2' }}
+          </td>
+          <td>
+            <span
+              class="status"
+              [ngClass]="payment.paymentStatus?.toLowerCase()">
+              {{ payment.paymentStatus }}
+            </span>
+          </td>
+          <td>
+            {{ payment.paymentDate | date:'dd MMM yyyy, hh:mm a' }}
+          </td>
+        </tr>
+
+        <tr *ngIf="payments.length === 0">
+          <td colspan="5" class="empty-message">
+            No payment records found.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination">
+    <button
+      (click)="previousPage()"
+      [disabled]="currentPage === 0">
+      Previous
+    </button>
+
+    <span>Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+
+    <button
+      (click)="nextPage()"
+      [disabled]="currentPage >= totalPages - 1 || totalPages === 0">
+      Next
+    </button>
+  </div>
+
+</div>
+
