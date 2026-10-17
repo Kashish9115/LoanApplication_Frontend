@@ -1,0 +1,120 @@
+
+.customer-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f3f6fb;
+}
+
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, #0866df, #102747);
+  color: white;
+  min-height: 100vh;
+  transition: width 0.25s;
+  overflow: hidden;
+}
+
+.sidebar.closed {
+  width: 0;
+}
+
+.sidebar-brand {
+  padding: 35px 20px;
+  text-align: center;
+
+  .brand-icon {
+    font-size: 40px;
+  }
+
+  h2 {
+    font-size: 24px;
+    margin-top: 10px;
+    color: white;
+  }
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px;
+
+  a {
+    display: block;
+    padding: 14px 18px;
+    color: #dce7f5;
+    text-decoration: none;
+    border-radius: 6px;
+    white-space: nowrap;
+    font-size: 14px;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    &.active {
+      background: #1265d4;
+      color: white;
+      font-weight: 600;
+    }
+  }
+}
+
+.menu-heading {
+  font-size: 11px;
+  font-weight: 700;
+  color: #b6ccec;
+  letter-spacing: 1px;
+  padding: 20px 18px 8px;
+}
+
+.main-section {
+  flex: 1;
+  min-width: 0;
+}
+
+.topbar {
+  height: 70px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 25px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.menu-button {
+  border: none;
+  background: transparent;
+  font-size: 24px;
+  cursor: pointer;
+  color: #102747;
+}
+
+.topbar-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #102747;
+}
+
+.topbar-right {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  color: #344054;
+}
+
+.page-content {
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 210px;
+  }
+
+  .topbar-title {
+    font-size: 14px;
+  }
+}

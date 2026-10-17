@@ -1,0 +1,134 @@
+
+<div class="scorecard-page">
+
+  <div class="page-heading">
+    <h2>Customer Scorecard</h2>
+    <p>Generate and view customer credit decisions</p>
+  </div>
+
+  <div class="form-card">
+
+    <label for="customerId">Customer ID</label>
+
+    <input
+      id="customerId"
+      type="number"
+      [(ngModel)]="customerId"
+      min="1"
+      placeholder="Enter Customer ID"
+    />
+
+    <div class="button-group">
+
+      <button
+        class="primary-btn"
+        [disabled]="loading || !customerId || customerId <= 0"
+        (click)="generateScorecard()">
+
+        {{ loading ? 'Processing...' : 'Generate Scorecard' }}
+
+      </button>
+
+      <button
+        class="secondary-btn"
+        [disabled]="loading || !customerId || customerId <= 0"
+        (click)="viewScorecard()">
+
+        View Latest Scorecard
+
+      </button>
+
+    </div>
+
+  </div>
+
+  @if (errorMessage) {
+    <div class="message error">{{ errorMessage }}</div>
+  }
+
+  @if (successMessage) {
+    <div class="message success">{{ successMessage }}</div>
+  }
+
+  @if (scorecard) {
+
+    <div class="result-card">
+
+      <h3>Scorecard Details</h3>
+
+      <div class="score-summary">
+
+        <div class="score-block">
+          <p>CIBIL Score</p>
+          <h1>{{ scorecard.cibilScore }}</h1>
+          <span>{{ scorecard.cibilStatus }}</span>
+        </div>
+
+        <div class="amount-block">
+          <p>Maximum Eligible Loan Amount</p>
+          <h2>
+            {{ scorecard.eligibleLoanAmount
+              | currency:'INR':'symbol':'1.0-0' }}
+          </h2>
+        </div>
+
+      </div>
+
+      <div class="details-grid">
+
+        <div>
+          <label>Scorecard ID</label>
+          <strong>{{ scorecard.scoreCardId }}</strong>
+        </div>
+
+        <div>
+          <label>Customer ID</label>
+          <strong>{{ scorecard.customerId }}</strong>
+        </div>
+
+        <div>
+          <label>Risk Category</label>
+          <strong>{{ scorecard.riskCategory }}</strong>
+        </div>
+
+        <div>
+          <label>Approval Type</label>
+          <strong>{{ scorecard.approvalType }}</strong>
+        </div>
+
+        <div>
+          <label>Current Status</label>
+          <strong
+            [class.approved]="scorecard.currentStatus === 'AUTO_APPROVED'"
+            [class.rejected]="scorecard.currentStatus === 'REJECTED'">
+            {{ scorecard.currentStatus }}
+          </strong>
+        </div>
+
+        <div>
+          <label>Generated Date</label>
+          <strong>
+            {{ scorecard.appliedDate | date:'dd MMM yyyy, hh:mm a' }}
+          </strong>
+        </div>
+
+      </div>
+
+      @if (scorecard.rejectionReason) {
+        <div class="message error">
+          {{ scorecard.rejectionReason }}
+        </div>
+      }
+
+      @if (scorecard.currentStatus !== 'REJECTED') {
+        <a
+          routerLink="/customer/apply-loan"
+          class="apply-btn">
+          Proceed to Apply Loan
+        </a>
+      }
+
+    </div>
+  }
+
+</div>

@@ -1,0 +1,109 @@
+
+<div class="customer-layout">
+
+  <!-- CUSTOMER SIDEBAR -->
+  <aside class="sidebar" [class.closed]="!sidebarOpen">
+
+    <div class="sidebar-brand">
+      <span class="brand-icon">🏦</span>
+      <h2>Customer</h2>
+    </div>
+
+    <nav class="sidebar-menu">
+
+      <!-- DASHBOARD -->
+      <a
+        routerLink="/customer/dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }">
+        🏠 Dashboard
+      </a>
+
+      <!-- CUSTOMER SECTION -->
+      <div class="menu-heading">CUSTOMER</div>
+
+      <a routerLink="/customer/profile"
+         routerLinkActive="active">
+        👤 Profile
+      </a>
+
+      <a routerLink="/customer/kyc"
+         routerLinkActive="active">
+        📄 KYC Verification
+      </a>
+
+      <a routerLink="/customer/cibil"
+         routerLinkActive="active">
+        📊 CIBIL Score
+      </a>
+
+      <!-- YOUR MODULE: M04 -->
+      <div class="menu-heading">LOAN ELIGIBILITY</div>
+
+      <a routerLink="/customer/eligibility"
+         routerLinkActive="active">
+        ✅ Eligibility Result
+      </a>
+
+      <a routerLink="/customer/scorecard"
+         routerLinkActive="active">
+        📋 Scorecard Generation
+      </a>
+
+      <!-- YOUR MODULE: LOAN DEAL -->
+      <div class="menu-heading">LOAN SERVICES</div>
+
+      <a routerLink="/customer/apply-loan"
+         routerLinkActive="active">
+        💰 Apply for Loan
+      </a>
+
+      <a routerLink="/customer/track-status"
+         routerLinkActive="active">
+        🔎 Track Loan Status
+      </a>
+
+      <!-- OTHER TEAM MODULES -->
+      <div class="menu-heading">OTHER SERVICES</div>
+
+      <a routerLink="/customer/payments"
+         routerLinkActive="active">
+        💳 Payments
+      </a>
+
+    </nav>
+
+  </aside>
+
+  <!-- MAIN SECTION -->
+  <div class="main-section">
+
+    <!-- TOP NAVBAR -->
+    <header class="topbar">
+
+      <button
+        class="menu-button"
+        type="button"
+        (click)="toggleSidebar()">
+        ☰
+      </button>
+
+      <span class="topbar-title">
+        Loan Management System
+      </span>
+
+      <div class="topbar-right">
+        <span>🔔</span>
+        <span>Customer</span>
+      </div>
+
+    </header>
+
+    <!-- ANGULAR CHILD ROUTES -->
+    <main class="page-content">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+
+</div>

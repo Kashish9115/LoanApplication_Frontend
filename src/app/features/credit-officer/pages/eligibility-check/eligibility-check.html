@@ -1,0 +1,96 @@
+
+<div class="eligibility-page">
+  <div class="page-header">
+    <h1>Customer Eligibility Check</h1>
+    <p>Assess and save eligibility for a registered customer.</p>
+  </div>
+
+  <section class="eligibility-card">
+    <div class="form-group">
+      <label for="customerId">Customer ID</label>
+      <input
+        id="customerId"
+        type="number"
+        min="1"
+        [(ngModel)]="request.customerId"
+        [disabled]="loading"
+        placeholder="Enter Customer ID"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="cibilScore">Verified CIBIL Score</label>
+      <input
+        id="cibilScore"
+        type="number"
+        min="300"
+        max="900"
+        step="1"
+        [(ngModel)]="request.cibilScore"
+        [disabled]="loading"
+        placeholder="Enter verified CIBIL score"
+      />
+    </div>
+
+    <div class="button-row">
+      <button
+        type="button"
+        class="primary-button"
+        (click)="calculate()"
+        [disabled]="loading"
+      >
+        {{ loading ? 'Calculating...' : 'Calculate Eligibility' }}
+      </button>
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="reset()"
+        [disabled]="loading"
+      >
+        Reset
+      </button>
+    </div>
+  </section>
+
+  <div class="alert alert-success" *ngIf="successMessage">
+    {{ successMessage }}
+  </div>
+
+  <div class="alert alert-error" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <section class="result-card" *ngIf="result">
+    <h2>Eligibility Result</h2>
+
+    <div class="result-row">
+      <span>Customer ID</span>
+      <strong>{{ result.customerId }}</strong>
+    </div>
+
+    <div class="result-row">
+      <span>CIBIL Score</span>
+      <strong>{{ result.cibilScore }}</strong>
+    </div>
+
+    <div class="result-row">
+      <span>Eligibility Status</span>
+      <strong>
+        {{ result.eligible ? 'Eligible' : 'Not Eligible' }}
+      </strong>
+    </div>
+
+    <div class="result-row">
+      <span>Eligible Loan Amount</span>
+      <strong>
+        {{ result.eligibleLoanAmount | currency:'INR':'symbol':'1.0-2' }}
+      </strong>
+    </div>
+
+    <div class="result-row" *ngIf="result.rejectionReason">
+      <span>Reason</span>
+      <strong>{{ result.rejectionReason }}</strong>
+    </div>
+  </section>
+</div>

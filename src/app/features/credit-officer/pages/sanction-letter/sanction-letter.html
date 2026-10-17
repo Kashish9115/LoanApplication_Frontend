@@ -1,0 +1,601 @@
+
+<div class="sanction-page">
+  <div class="welcome-bar">
+    <span>Welcome, Loan Officer</span>
+    <span class="officer-label">Loan Officer Panel</span>
+  </div>
+
+  <div class="content-card">
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <h1>Sanction Letters</h1>
+
+      <button
+        type="button"
+        class="primary-btn"
+        [disabled]="!canGenerate"
+        (click)="openGenerateModal()">
+        + Generate Sanction Letter
+      </button>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="filter-card">
+      <div class="filter-field">
+        <label for="dealId">Search Loan Deal</label>
+        <input
+          id="dealId"
+          type="number"
+          min="1"
+          [(ngModel)]="dealId"
+          placeholder="Enter Deal ID"
+          (keyup.enter)="searchLoan()">
+      </div>
+
+      <button
+        type="button"
+        class="primary-btn"
+        [disabled]="isBusy"
+        (click)="searchLoan()">
+        {{ loading ? 'Searching...' : 'Search' }}
+      </button>
+
+      <button
+        type="button"
+        class="reset-btn"
+        [disabled]="isBusy"
+        (click)="reset()">
+        Reset
+      </button>
+    </div>
+
+    <!-- MESSAGES -->
+    @if (successMessage) {
+      <div class="alert success">{{ successMessage }}</div>
+    }
+
+    @if (errorMessage) {
+      <div class="alert error">{{ errorMessage }}</div>
+    }
+
+    <!-- SEARCHED DEAL -->
+    <div class="table-wrapper">
+      <table class="loan-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Deal ID</th>
+            <th>Customer ID</th>
+            <th>Loan Amount</th>
+            <th>Loan Type</th>
+            <th>Tenure</th>
+            <th>Status</th>
+            <th>Action</th>
+            <th>Disbursement</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @if (loanDeal) {
+            <tr>
+              <td>1</td>
+              <td>{{ loanDeal.dealId }}</td>
+              <td>{{ loanDeal.customerId }}</td>
+              <td>
+                {{
+                  (loanDeal.approvedAmount ??
+                    loanDeal.requestedLoanAmount)
+                    | currency:'INR':'symbol':'1.2-2'
+                }}
+              </td>
+              <td>
+                {{
+                  loanDeal.loanType === 'HOME_LOAN'
+                    ? 'Home Loan'
+                    : 'Vehicle Loan'
+                }}
+              </td>
+              <td>{{ loanDeal.tenureMonths }} months</td>
+              <td>
+                <span
+                  class="status-badge"
+                  [class.disbursed]="loanDeal.dealStatus === 'DISBURSED'">
+                  {{ loanDeal.dealStatus }}
+                </span>
+              </td>
+              <td>
+                <div class="table-actions">
+                  <button
+                    type="button"
+                    class="view-btn"
+                    [disabled]="loading"
+                    (click)="viewSanction()">
+                    View
+                  </button>
+
+                  <button
+                    type="button"
+                    class="generate-btn"
+                    [disabled]="!canGenerate"
+                    (click)="openGenerateModal()">
+                    Generate
+                  </button>
+                </div>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="disburse-btn"
+                  [disabled]="!canOpenDisbursement || isBusy"
+                  (click)="openDisbursementModal()">
+                  @if (loanDeal.dealStatus === 'DISBURSED') {
+                    View Disbursement
+                  } @else {
+                    Disbursement
+                  }
+                </button>
+              </td>
+            </tr>
+          } @else {
+            <tr>
+              <td colspan="9" class="empty-row">
+                Search using a Deal ID to view loan details.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SANCTION HISTORY -->
+    <section class="history-section">
+      <div class="page-header history-header">
+        <div>
+          <h2>Sanction History</h2>
+          <p>All previously generated sanction records</p>
+        </div>
+
+        <button
+          type="button"
+          class="reset-btn"
+          [disabled]="historyLoading"
+          (click)="loadSanctionHistory()">
+          {{ historyLoading ? 'Refreshing...' : 'Refresh History' }}
+        </button>
+      </div>
+
+      @if (historyError) {
+        <div class="alert error">{{ historyError }}</div>
+      }
+
+      <div class="history-count">
+        Total records: <strong>{{ sanctionHistory.length }}</strong>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="loan-table">
+          <thead>
+            <tr>
+              <th>Sanction ID</th>
+              <th>Deal ID</th>
+              <th>Customer ID</th>
+              <th>Loan Type</th>
+              <th>Approved Amount</th>
+              <th>Interest Rate</th>
+              <th>Tenure</th>
+              <th>Monthly EMI</th>
+              <th>Status</th>
+              <th>Created Date</th>
+              <th>Action</th>
+              <th>Disbursement</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @if (historyLoading && sanctionHistory.length === 0) {
+              <tr>
+                <td colspan="12" class="empty-row">
+                  Loading sanction history...
+                </td>
+              </tr>
+            } @else if (sanctionHistory.length > 0) {
+              @for (item of sanctionHistory; track item.sanctionId) {
+                <tr>
+                  <td>{{ item.sanctionId }}</td>
+                  <td>{{ item.dealId }}</td>
+                  <td>{{ item.customerId }}</td>
+                  <td>
+                    {{
+                      item.loanType === 'HOME_LOAN'
+                        ? 'Home Loan'
+                        : 'Vehicle Loan'
+                    }}
+                  </td>
+                  <td>
+                    {{
+                      item.approvedLoanAmount
+                        | currency:'INR':'symbol':'1.2-2'
+                    }}
+                  </td>
+                  <td>{{ item.interestRate }}%</td>
+                  <td>{{ item.tenureMonths }} months</td>
+                  <td>
+                    {{
+                      item.emiAmount
+                        | currency:'INR':'symbol':'1.2-2'
+                    }}
+                  </td>
+                  <td>
+                    <span
+                      class="status-badge"
+                      [class.disbursed]="item.dealStatus === 'DISBURSED'">
+                      {{ item.dealStatus }}
+                    </span>
+                  </td>
+                  <td>
+                    {{
+                      item.createdAt
+                        ? (item.createdAt | date:'dd MMM yyyy, hh:mm a')
+                        : '—'
+                    }}
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      class="view-btn"
+                      [disabled]="loading"
+                      (click)="viewHistoricalSanction(item)">
+                      View
+                    </button>
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      class="disburse-btn"
+                      [disabled]="isBusy"
+                      (click)="openHistoricalDisbursement(item)">
+                      @if (item.dealStatus === 'DISBURSED') {
+                        View
+                      } @else {
+                        Disbursement
+                      }
+                    </button>
+                  </td>
+                </tr>
+              }
+            } @else {
+              <tr>
+                <td colspan="12" class="empty-row">
+                  No sanction records found.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SANCTION SUMMARY -->
+    @if (sanction) {
+      <section class="sanction-summary">
+        <h3>Sanction Details</h3>
+
+        <div class="summary-grid">
+          <p>Sanction ID: <strong>{{ sanction.sanctionId }}</strong></p>
+          <p>Deal ID: <strong>{{ sanction.dealId }}</strong></p>
+          <p>
+            Approved Amount:
+            <strong>
+              {{
+                sanction.approvedLoanAmount
+                  | currency:'INR':'symbol':'1.2-2'
+              }}
+            </strong>
+          </p>
+          <p>Interest Rate: <strong>{{ sanction.interestRate }}%</strong></p>
+          <p>
+            Monthly EMI:
+            <strong>
+              {{
+                sanction.emiAmount
+                  | currency:'INR':'symbol':'1.2-2'
+              }}
+            </strong>
+          </p>
+          <p>Status: <strong>{{ sanction.dealStatus }}</strong></p>
+        </div>
+
+        <button
+          type="button"
+          class="view-btn"
+          (click)="previewGenerated()">
+          View Sanction Letter
+        </button>
+      </section>
+    }
+  </div>
+
+  <!-- GENERATE SANCTION MODAL -->
+  @if (showGenerateModal && loanDeal) {
+    <div class="modal-backdrop">
+      <section
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Generate Sanction Letter">
+
+        <div class="modal-header">
+          <h3>Generate Sanction Letter</h3>
+          <button type="button" (click)="closeGenerateModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <label>Customer ID</label>
+          <input [value]="loanDeal.customerId" readonly>
+
+          <label>Deal ID</label>
+          <input [value]="loanDeal.dealId" readonly>
+
+          <label>Approved Loan Amount</label>
+          <input
+            [value]="
+              (loanDeal.approvedAmount ??
+                loanDeal.requestedLoanAmount)
+                | currency:'INR':'symbol':'1.2-2'
+            "
+            readonly>
+
+          <label>Loan Type</label>
+          <input [value]="loanDeal.loanType" readonly>
+
+          <label>Tenure Months</label>
+          <input [value]="loanDeal.tenureMonths" readonly>
+
+          <label>Interest Rate</label>
+          <input value="Calculated by backend" readonly>
+
+          <label>EMI Amount</label>
+          <input value="Calculated by backend" readonly>
+        </div>
+
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="reset-btn"
+            (click)="closeGenerateModal()">
+            Close
+          </button>
+
+          <button
+            type="button"
+            class="generate-btn"
+            [disabled]="generating"
+            (click)="generateSanction()">
+            {{ generating ? 'Generating...' : 'Generate Sanction' }}
+          </button>
+        </div>
+      </section>
+    </div>
+  }
+
+  <!-- SANCTION PREVIEW MODAL -->
+  @if (showPreviewModal && sanction) {
+    <div class="modal-backdrop">
+      <section
+        class="modal preview-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Sanction Letter Preview">
+
+        <div class="modal-header">
+          <h3>Sanction Letter Preview</h3>
+          <button
+            type="button"
+            (click)="closePreviewModal()">
+            ✕
+          </button>
+        </div>
+
+        <div class="modal-body letter-preview">
+          <h2>LOAN SANCTION LETTER</h2>
+          <p>Date: {{ sanction.createdAt | date:'dd/MM/yyyy' }}</p>
+          <p>Customer ID: {{ sanction.customerId }}</p>
+          <p>Your loan has been sanctioned with the following terms:</p>
+
+          <table>
+            <tbody>
+              <tr><th>Sanction ID</th><td>{{ sanction.sanctionId }}</td></tr>
+              <tr><th>Deal ID</th><td>{{ sanction.dealId }}</td></tr>
+              <tr><th>Loan Type</th><td>{{ sanction.loanType }}</td></tr>
+              <tr>
+                <th>Approved Amount</th>
+                <td>
+                  {{
+                    sanction.approvedLoanAmount
+                      | currency:'INR':'symbol':'1.2-2'
+                  }}
+                </td>
+              </tr>
+              <tr><th>Interest Rate</th><td>{{ sanction.interestRate }}%</td></tr>
+              <tr><th>Tenure</th><td>{{ sanction.tenureMonths }} months</td></tr>
+              <tr>
+                <th>Monthly EMI</th>
+                <td>
+                  {{
+                    sanction.emiAmount
+                      | currency:'INR':'symbol':'1.2-2'
+                  }}
+                </td>
+              </tr>
+              <tr><th>EMI Due Day</th><td>{{ sanction.emiDay }}</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="primary-btn"
+            (click)="closePreviewModal()">
+            Close Preview
+          </button>
+        </div>
+      </section>
+    </div>
+  }
+
+  <!-- DISBURSEMENT MODAL: FOUR FIELDS ONLY -->
+  @if (showDisbursementModal && loanDeal) {
+    <div class="modal-backdrop">
+      <section
+        class="modal disbursement-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Loan Disbursement">
+
+        <div class="modal-header disbursement-header">
+          <h3>Loan Disbursement</h3>
+
+          <button
+            type="button"
+            [disabled]="disbursementSubmitting || disbursementLoading"
+            (click)="closeDisbursementModal()">
+            ✕
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <!-- FIELD 1: DEAL ID -->
+          <label for="disbursementDealId">Deal ID</label>
+          <input
+            id="disbursementDealId"
+            type="number"
+            [value]="loanDeal.dealId"
+            readonly>
+
+          <!-- FIELD 2: DISBURSEMENT AMOUNT -->
+          <label for="disbursementAmount">Disbursement Amount</label>
+          <input
+            id="disbursementAmount"
+            type="number"
+            [value]="
+              disbursement?.disbursedAmount ??
+              loanDeal.approvedAmount ??
+              loanDeal.requestedLoanAmount
+            "
+            readonly>
+
+          <!-- FIELD 3: DATE -->
+          <label for="disbursementDate">Date</label>
+          <input
+            id="disbursementDate"
+            type="date"
+            [(ngModel)]="disbursementDate"
+            [disabled]="
+              disbursementLoading ||
+              disbursementSubmitting ||
+              !!disbursement
+            "
+            required>
+
+          <!-- FIELD 4: BANK PARTNER -->
+          <label for="bankPartner">Bank Partner</label>
+          <select
+            id="bankPartner"
+            [(ngModel)]="selectedBankPartner"
+            [disabled]="
+              disbursementLoading ||
+              disbursementSubmitting ||
+              !!disbursement
+            "
+            required>
+
+            <option value="">Select Bank Partner</option>
+
+            @for (bank of bankPartners; track bank) {
+              <option [value]="bank">{{ bank }}</option>
+            }
+          </select>
+
+          @if (disbursementLoading) {
+            <p class="loading-message">
+              Loading disbursement details...
+            </p>
+          }
+
+          @if (modalError) {
+            <div class="alert error">{{ modalError }}</div>
+          }
+
+          @if (disbursementLookup === 'not-found') {
+            <div class="alert info">
+              No disbursement record found for this loan.
+            </div>
+          }
+
+          @if (disbursement) {
+            <div class="disbursement-status">
+              <h4>Disbursement Details</h4>
+              <p>
+                Disbursement ID:
+                <strong>{{ disbursement.disbursementId }}</strong>
+              </p>
+              <p>
+                Status:
+                <strong>{{ disbursement.disbursementStatus }}</strong>
+              </p>
+              @if (disbursement.disbursedAt) {
+                <p>
+                  Disbursed At:
+                  <strong>
+                    {{ disbursement.disbursedAt | date:'dd/MM/yyyy hh:mm a' }}
+                  </strong>
+                </p>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="reset-btn"
+            [disabled]="disbursementSubmitting || disbursementLoading"
+            (click)="closeDisbursementModal()">
+            Close
+          </button>
+
+          @if (canCreateDisbursement) {
+            <button
+              type="button"
+              class="generate-btn"
+              [disabled]="disbursementSubmitting || disbursementLoading"
+              (click)="createDisbursement()">
+              {{ disbursementSubmitting ? 'Submitting...' : 'Submit' }}
+            </button>
+          }
+
+          @if (canCompleteDisbursement) {
+            <button
+              type="button"
+              class="generate-btn"
+              [disabled]="disbursementSubmitting || disbursementLoading"
+              (click)="completeDisbursement()">
+              {{
+                disbursementSubmitting
+                  ? 'Processing...'
+                  : 'Complete Disbursement'
+              }}
+            </button>
+          }
+
+          @if (disbursement?.disbursementStatus === 'COMPLETED') {
+            <span class="completed-label">
+              ✓ Disbursed Successfully
+            </span>
+          }
+        </div>
+      </section>
+    </div>
+  }
+</div>

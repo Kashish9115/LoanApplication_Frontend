@@ -1,0 +1,72 @@
+
+<div class="officer-layout">
+
+  <aside class="officer-sidebar" [class.closed]="!sidebarOpen">
+
+    <div class="sidebar-brand">
+      <div class="brand-icon">🏦</div>
+      <h2>Loan Officer</h2>
+    </div>
+
+    <nav>
+
+      <a
+        routerLink="/officer/dashboard"
+        routerLinkActive="active">
+        Dashboard
+      </a>
+<a
+  routerLink="/officer/eligibility"
+  routerLinkActive="active">
+  Eligibility Check
+</a>
+
+
+<a
+  routerLink="/officer/manual-review"
+  routerLinkActive="active"
+  [routerLinkActiveOptions]="{ exact: true }">
+  Manual Review
+</a>
+
+      <div class="menu-heading">LOAN PROCESSING</div>
+
+      <a
+        routerLink="/officer/sanctions"
+        routerLinkActive="active">
+        Sanction Letters
+      </a>
+
+      
+
+      <a
+        routerLink="/officer/loan-accounts"
+        routerLinkActive="active">
+        Loan Accounts
+      </a>
+
+    </nav>
+
+  </aside>
+
+  <div class="main-section">
+
+    <header class="topbar">
+
+      <button type="button" (click)="toggleSidebar()">
+        ☰
+      </button>
+
+      <strong>Loan Management System</strong>
+
+      <span>Loan Officer</span>
+
+    </header>
+
+    <main class="page-content">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+
+</div>

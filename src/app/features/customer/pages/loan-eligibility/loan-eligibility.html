@@ -1,0 +1,81 @@
+<div class="eligibility-page">
+  <div class="page-heading">
+    <h2>Eligibility Result</h2>
+    <p>View the eligibility assessment completed by your loan officer.</p>
+  </div>
+
+  <div class="lookup-card">
+    <form #lookupForm="ngForm" (ngSubmit)="viewResult()">
+      <label for="customerId">Customer ID</label>
+
+      <input
+        id="customerId"
+        name="customerId"
+        type="number"
+        [(ngModel)]="customerId"
+        min="1"
+        required
+        placeholder="Enter your Customer ID"
+      />
+
+      <button
+        type="submit"
+        [disabled]="loading || lookupForm.invalid">
+        {{ loading ? 'Loading result...' : 'View Eligibility Result' }}
+      </button>
+    </form>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="result as r" class="result-card">
+    <div class="result-heading">
+      <span class="check-icon">✓</span>
+      <h3>Eligibility Assessment</h3>
+    </div>
+
+    <div class="result-grid">
+      <div class="result-item">
+        <p>Customer Name</p>
+        <h3>{{ r.customerName }}</h3>
+      </div>
+
+      <div class="result-item">
+        <p>PAN Number</p>
+        <h3>{{ r.panNo || 'Not available' }}</h3>
+      </div>
+
+      <div class="result-item">
+        <p>Monthly Income</p>
+        <h3>{{ r.monthlyIncome | currency:'INR':'symbol':'1.2-2' }}</h3>
+      </div>
+
+      <div class="result-item">
+        <p>CIBIL Score</p>
+        <h3>{{ r.cibilScore }}</h3>
+      </div>
+
+      <div class="result-item">
+        <p>CIBIL Status</p>
+        <h3>{{ r.cibilStatus }}</h3>
+      </div>
+
+      <div class="result-item amount-item">
+        <p>Eligible Loan Amount</p>
+        <h3>{{ r.eligibleLoanAmount | currency:'INR':'symbol':'1.0-0' }}</h3>
+      </div>
+    </div>
+
+    <div *ngIf="r.eligible" class="approved-banner">
+      <h2>✓ Approved</h2>
+      <p>Congratulations! Your loan eligibility is approved.</p>
+    </div>
+
+    <div *ngIf="!r.eligible" class="rejected-banner">
+      <h2>✕ Not Eligible</h2>
+      <p>{{ r.rejectionReason || 'Your loan eligibility was not approved.' }}</p>
+    </div>
+  </div>
+</div>

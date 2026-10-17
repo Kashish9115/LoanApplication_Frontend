@@ -1,12 +1,17 @@
 
-.dashboard-layout {
-  display: flex;
-  min-height: 100vh;
+.dashboard-page {
+  padding: 30px;
+  min-height: calc(100vh - 70px);
+  background: #f3f6fb;
 }
 
-.dashboard-content {
-  flex: 1;
-  min-width: 0;
-  padding: 25px;
-  background: #f3f6fb;
+h1 {
+  margin: 0 0 12px;
+  color: #142b49;
+  font-size: 32px;
+}
+
+p {
+  color: #667085;
+  font-size: 16px;
 }

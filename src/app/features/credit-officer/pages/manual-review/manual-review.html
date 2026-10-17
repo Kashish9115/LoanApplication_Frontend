@@ -1,0 +1,317 @@
+
+<div class="manual-review-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1>Manual Loan Review</h1>
+      <p>Review loan applications awaiting a credit officer's decision.</p>
+    </div>
+
+    <button
+      type="button"
+      class="refresh-btn"
+      (click)="refreshApplications()"
+      [disabled]="loading || submitting">
+      {{ loading ? 'Loading...' : 'Refresh Applications' }}
+    </button>
+  </div>
+
+  <!-- Error Message -->
+  <div
+    class="message error"
+    *ngIf="errorMessage"
+    role="alert">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Success Message -->
+  <div
+    class="message success"
+    *ngIf="successMessage"
+    role="status">
+    {{ successMessage }}
+  </div>
+
+  <!-- Pending Applications Summary -->
+  <div class="summary-card">
+    <div>
+      <span>Pending Applications</span>
+      <h2>{{ totalElements }}</h2>
+    </div>
+
+    <div class="summary-icon">✓</div>
+  </div>
+
+  <!-- Applications Table -->
+  <div class="table-card">
+
+    <div class="table-header">
+      <h2>Applications Awaiting Review</h2>
+      <span class="status-badge">MANUAL REVIEW</span>
+    </div>
+
+    <!-- Loading State -->
+    <div
+      *ngIf="loading"
+      class="empty-state"
+      role="status">
+      Loading loan applications...
+    </div>
+
+    <!-- Empty State -->
+    <div
+      *ngIf="!loading && !errorMessage && deals.length === 0"
+      class="empty-state">
+      <h3>No pending applications</h3>
+      <p>There are currently no loan deals awaiting manual review.</p>
+    </div>
+
+    <!-- Error State -->
+    <div
+      *ngIf="!loading && errorMessage && deals.length === 0"
+      class="empty-state">
+      <h3>Applications could not be loaded</h3>
+      <p>Check the error message above and retry.</p>
+
+      <button
+        type="button"
+        class="refresh-btn"
+        (click)="loadManualReviewDeals()"
+        [disabled]="loading || submitting">
+        Retry
+      </button>
+    </div>
+
+    <!-- Data Table -->
+    <div
+      class="table-wrapper"
+      *ngIf="!loading && deals.length > 0">
+
+      <table>
+        <thead>
+          <tr>
+            <th>Deal ID</th>
+            <th>Customer ID</th>
+            <th>Loan Type</th>
+            <th>Requested Amount</th>
+            <th>Eligible Amount</th>
+            <th>CIBIL Score</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let deal of deals; trackBy: trackByDealId">
+            <td>#{{ deal.dealId }}</td>
+            <td>{{ deal.customerId }}</td>
+            <td>{{ deal.loanType }}</td>
+
+            <td>
+              {{ deal.requestedLoanAmount | currency:'INR':'symbol':'1.0-0' }}
+            </td>
+
+            <td>
+              {{ deal.eligibleLoanAmount | currency:'INR':'symbol':'1.0-0' }}
+            </td>
+
+            <td>{{ deal.cibilScore }}</td>
+
+            <td>
+              <span class="status-badge">
+                {{ deal.dealStatus }}
+              </span>
+            </td>
+
+            <td>
+              <button
+                type="button"
+                class="view-btn"
+                (click)="viewDeal(deal)"
+                [disabled]="submitting">
+                View
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div
+      class="pagination"
+      *ngIf="!loading && totalPages > 1">
+
+      <button
+        type="button"
+        (click)="previousPage()"
+        [disabled]="currentPage === 0 || loading || submitting">
+        Previous
+      </button>
+
+      <span>
+        Page {{ currentPage + 1 }} of {{ totalPages }}
+      </span>
+
+      <button
+        type="button"
+        (click)="nextPage()"
+        [disabled]="currentPage + 1 >= totalPages || loading || submitting">
+        Next
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Application Details Modal -->
+  <div
+    class="details-overlay"
+    *ngIf="selectedDeal as deal">
+
+    <section
+      class="details-panel"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="'Application details for deal ' + deal.dealId">
+
+      <!-- Modal Header -->
+      <div class="details-header">
+        <div>
+          <h2>Application #{{ deal.dealId }}</h2>
+          <p>Customer ID: {{ deal.customerId }}</p>
+        </div>
+
+        <button
+          type="button"
+          class="close-btn"
+          (click)="closeDetails()"
+          [disabled]="submitting"
+          aria-label="Close application details">
+          ×
+        </button>
+      </div>
+
+      <!-- Application Information -->
+      <div class="details-grid">
+
+        <div class="detail-item">
+          <span>Loan Type</span>
+          <strong>{{ deal.loanType }}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Requested Amount</span>
+          <strong>
+            {{ deal.requestedLoanAmount | currency:'INR':'symbol':'1.0-0' }}
+          </strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Eligible Amount</span>
+          <strong>
+            {{ deal.eligibleLoanAmount | currency:'INR':'symbol':'1.0-0' }}
+          </strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Approved Amount</span>
+          <strong>
+            {{
+              deal.approvedAmount != null
+                ? (deal.approvedAmount | currency:'INR':'symbol':'1.0-0')
+                : 'Pending officer decision'
+            }}
+          </strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Tenure</span>
+          <strong>{{ deal.tenureMonths }} months</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>CIBIL Score</span>
+          <strong>{{ deal.cibilScore }} ({{ deal.cibilStatus }})</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>EMI Day</span>
+          <strong>{{ deal.emiDay }}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Bank</span>
+          <strong>{{ deal.bankName || 'Not available' }}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Account Holder</span>
+          <strong>{{ deal.accountHolderName || 'Not available' }}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Account Number</span>
+          <strong>{{ deal.bankAccountNumber || 'Not available' }}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>IFSC</span>
+          <strong>{{ deal.ifscCode || 'Not available' }}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Preferred Disbursement</span>
+          <strong>
+            {{ deal.preferredDisbursementDate || 'Not available' }}
+          </strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Application Status</span>
+          <strong>{{ deal.dealStatus }}</strong>
+        </div>
+
+      </div>
+
+      <div class="review-note">
+        Confirm the application details before making a decision.
+      </div>
+
+      <!-- Review Actions -->
+      <div class="review-actions">
+
+        <button
+          type="button"
+          class="approve-btn"
+          (click)="approveDeal()"
+          [disabled]="submitting || loading">
+          {{ submitting ? 'Submitting...' : 'Approve Application' }}
+        </button>
+
+        <button
+          type="button"
+          class="reject-btn"
+          (click)="rejectDeal()"
+          [disabled]="submitting || loading">
+          {{ submitting ? 'Submitting...' : 'Reject Application' }}
+        </button>
+
+        <button
+          type="button"
+          class="cancel-btn"
+          (click)="closeDetails()"
+          [disabled]="submitting">
+          Cancel
+        </button>
+
+      </div>
+
+      <p class="decision-note">
+        The review request uses the officer ID configured in the component.
+      </p>
+
+    </section>
+  </div>
+
+</div>

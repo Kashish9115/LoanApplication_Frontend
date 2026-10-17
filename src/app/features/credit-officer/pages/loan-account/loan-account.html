@@ -1,0 +1,591 @@
+<div class="loan-account-page">
+
+  <!-- WELCOME BAR -->
+  <div class="welcome-bar">
+    <span>Welcome, Loan Officer</span>
+    <span class="officer-label">Loan Officer Panel</span>
+  </div>
+
+  <div class="content-card">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div>
+        <h1>Loan Accounts</h1>
+        <p>View all loan accounts and create accounts after successful disbursement.</p>
+      </div>
+
+      <button
+        type="button"
+        class="primary-btn"
+        [disabled]="!canCreate"
+        (click)="openCreateModal()">
+        + Create Loan Account
+      </button>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="summary-grid">
+      <div class="summary-card">
+        <span>Total Accounts</span>
+        <strong>{{ totalElements }}</strong>
+      </div>
+
+      <div class="summary-card">
+        <span>Accounts on This Page</span>
+        <strong>{{ allLoanAccounts.length }}</strong>
+      </div>
+
+      <div class="summary-card">
+        <span>Active on This Page</span>
+        <strong>
+          {{
+            allLoanAccounts.filter(a => a.status === 'ACTIVE').length
+          }}
+        </strong>
+      </div>
+    </div>
+
+    <!-- SEARCH DEAL -->
+    <section class="section-card">
+      <div class="section-heading">
+        <h2>Find Loan Deal</h2>
+        <p>Search a deal to check eligibility for loan account creation.</p>
+      </div>
+
+      <div class="search-card">
+        <div class="search-field">
+          <label for="dealId">Deal ID</label>
+          <input
+            id="dealId"
+            type="number"
+            min="1"
+            [(ngModel)]="dealId"
+            placeholder="Enter Deal ID"
+            (keyup.enter)="searchLoan()"
+          />
+        </div>
+
+        <button
+          type="button"
+          class="primary-btn"
+          [disabled]="isBusy"
+          (click)="searchLoan()">
+          {{ isBusy ? 'Loading...' : 'Search Deal' }}
+        </button>
+
+        <button
+          type="button"
+          class="reset-btn"
+          [disabled]="isBusy"
+          (click)="reset()">
+          Reset
+        </button>
+      </div>
+
+      @if (successMessage) {
+        <div class="alert success">{{ successMessage }}</div>
+      }
+
+      @if (errorMessage) {
+        <div class="alert error">{{ errorMessage }}</div>
+      }
+
+      <!-- SEARCHED DEAL -->
+      @if (loanDeal) {
+        <div class="table-wrapper deal-table-wrapper">
+          <table class="loan-table">
+            <thead>
+              <tr>
+                <th>Deal ID</th>
+                <th>Customer ID</th>
+                <th>Loan Type</th>
+                <th>Loan Amount</th>
+                <th>Tenure</th>
+                <th>Deal Status</th>
+                <th>Account</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>{{ loanDeal.dealId }}</td>
+                <td>{{ loanDeal.customerId }}</td>
+                <td>
+                  {{
+                    loanDeal.loanType === 'HOME_LOAN'
+                      ? 'Home Loan'
+                      : 'Vehicle Loan'
+                  }}
+                </td>
+                <td>
+                  {{
+                    (loanDeal.approvedAmount ??
+                      loanDeal.requestedLoanAmount)
+                      | currency:'INR':'symbol':'1.2-2'
+                  }}
+                </td>
+                <td>{{ loanDeal.tenureMonths }} Months</td>
+                <td>
+                  <span
+                    class="status-badge"
+                    [class.completed]="loanDeal.dealStatus === 'DISBURSED'">
+                    {{ loanDeal.dealStatus }}
+                  </span>
+                </td>
+                <td>
+                  @if (checkingAccount) {
+                    <span>Checking...</span>
+                  } @else if (loanAccount) {
+                    <span class="status-badge completed">Created</span>
+                  } @else if (canCreate) {
+                    <button
+                      type="button"
+                      class="create-btn"
+                      (click)="openCreateModal()">
+                      Create
+                    </button>
+                  } @else {
+                    <span class="not-available">Not Available</span>
+                  }
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    <!-- ALL LOAN ACCOUNTS -->
+    <section class="section-card all-accounts-section">
+
+      <div class="section-heading list-heading">
+        <div>
+          <h2>All Loan Accounts</h2>
+          <p>Accounts are sorted by newest account first.</p>
+        </div>
+
+        <button
+          type="button"
+          class="refresh-btn"
+          [disabled]="listLoading"
+          (click)="loadAllLoanAccounts(currentPage)">
+          {{ listLoading ? 'Refreshing...' : '↻ Refresh' }}
+        </button>
+      </div>
+
+      <!-- LIST FILTERS -->
+      <div class="list-filters">
+        <div class="search-field list-search-field">
+          <label for="accountSearch">Search Accounts</label>
+          <input
+            id="accountSearch"
+            type="text"
+            [(ngModel)]="listSearch"
+            placeholder="Account number, Account ID, Deal ID or Customer ID"
+          />
+        </div>
+
+        <div class="search-field status-filter-field">
+          <label for="statusFilter">Account Status</label>
+          <select
+            id="statusFilter"
+            [(ngModel)]="statusFilter">
+            <option value="ALL">All Statuses</option>
+            <option value="ACTIVE">Active</option>
+            <option value="CLOSED">Closed</option>
+            <option value="PENDING">Pending</option>
+          </select>
+        </div>
+
+        <div class="search-field page-size-field">
+          <label for="pageSize">Rows per page</label>
+          <select
+            id="pageSize"
+            [ngModel]="pageSize"
+            (ngModelChange)="changePageSize($event)">
+            <option [ngValue]="5">5</option>
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="20">20</option>
+            <option [ngValue]="50">50</option>
+          </select>
+        </div>
+      </div>
+
+      @if (listError) {
+        <div class="alert error">
+          {{ listError }}
+          <button
+            type="button"
+            class="inline-retry-btn"
+            (click)="loadAllLoanAccounts(currentPage)">
+            Retry
+          </button>
+        </div>
+      }
+
+      <!-- ACCOUNTS TABLE -->
+      <div class="table-wrapper">
+        <table class="loan-table accounts-table">
+          <thead>
+            <tr>
+              <th>Account No.</th>
+              <th>Customer ID</th>
+              <th>Deal ID</th>
+              <th>Loan Type</th>
+              <th>Loan Amount</th>
+              <th>Outstanding Principal</th>
+              <th>Interest Rate</th>
+              <th>Tenure</th>
+              <th>Monthly EMI</th>
+              <th>EMI Day</th>
+              <th>Status</th>
+              <th>Created At</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @if (listLoading) {
+              <tr>
+                <td colspan="13" class="empty-row">
+                  <span class="loading-indicator"></span>
+                  Loading loan accounts...
+                </td>
+              </tr>
+            } @else if (filteredLoanAccounts.length > 0) {
+              @for (account of filteredLoanAccounts; track account.loanAccountId) {
+                <tr>
+                  <td>
+                    <strong class="account-number">
+                      {{ account.loanAccountNo }}
+                    </strong>
+                  </td>
+
+                  <td>{{ account.customerId }}</td>
+                  <td>{{ account.dealId }}</td>
+
+                  <td>
+                    <span class="loan-type-badge">
+                      {{
+                        account.loanType === 'HOME_LOAN'
+                          ? 'Home Loan'
+                          : account.loanType === 'VEHICLE_LOAN'
+                            ? 'Vehicle Loan'
+                            : account.loanType
+                      }}
+                    </span>
+                  </td>
+
+                  <td class="amount-cell">
+                    {{ account.loanAmount | currency:'INR':'symbol':'1.2-2' }}
+                  </td>
+
+                  <td class="amount-cell">
+                    {{
+                      account.outstandingAmount
+                        | currency:'INR':'symbol':'1.2-2'
+                    }}
+                  </td>
+
+                  <td>{{ account.interestRate }}%</td>
+                  <td>{{ account.tenureMonths }} months</td>
+
+                  <td class="amount-cell">
+                    {{ account.emiAmount | currency:'INR':'symbol':'1.2-2' }}
+                  </td>
+
+                  <td>{{ account.emiDay }}</td>
+
+                  <td>
+                    <span
+                      class="status-badge"
+                      [class.completed]="account.status === 'ACTIVE'"
+                      [class.closed]="account.status === 'CLOSED'">
+                      {{ account.status }}
+                    </span>
+                  </td>
+
+                  <td>
+                    {{
+                      account.createdAt
+                        ? (account.createdAt | date:'dd MMM yyyy')
+                        : '—'
+                    }}
+                  </td>
+
+                  <td>
+                    <button
+                      type="button"
+                      class="view-btn"
+                      (click)="dealId = account.dealId; searchLoan()">
+                      View
+                    </button>
+                  </td>
+                </tr>
+              }
+            } @else {
+              <tr>
+                <td colspan="13" class="empty-row">
+                  @if (allLoanAccounts.length === 0) {
+                    No loan accounts found.
+                  } @else {
+                    No accounts match your search or status filter.
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PAGINATION -->
+      <div class="pagination-bar">
+        <div class="pagination-info">
+          Showing
+          <strong>
+            {{
+              totalElements === 0
+                ? 0
+                : currentPage * pageSize + 1
+            }}
+          </strong>
+          to
+          <strong>
+            {{
+              totalElements === 0
+                ? 0
+                : (currentPage * pageSize + allLoanAccounts.length)
+            }}
+          </strong>
+          of <strong>{{ totalElements }}</strong> accounts
+        </div>
+
+        <div class="pagination-controls">
+          <button
+            type="button"
+            class="pagination-btn"
+            [disabled]="firstPage || listLoading"
+            (click)="previousPage()">
+            Previous
+          </button>
+
+          <span class="page-number">
+            Page {{ totalPages === 0 ? 0 : currentPage + 1 }}
+            of {{ totalPages }}
+          </span>
+
+          <button
+            type="button"
+            class="pagination-btn"
+            [disabled]="lastPage || listLoading"
+            (click)="nextPage()">
+            Next
+          </button>
+        </div>
+      </div>
+
+      <p class="filter-note">
+        Search and status filters apply to the currently loaded page.
+        Use pagination to browse other pages.
+      </p>
+    </section>
+
+    <!-- SELECTED ACCOUNT DETAILS -->
+    @if (loanAccount) {
+      <section class="account-details">
+
+        <div class="details-header">
+          <div>
+            <h3>Loan Account Details</h3>
+            <p>Account {{ loanAccount.loanAccountNo }}</p>
+          </div>
+
+          <span
+            class="account-status"
+            [class.active]="loanAccount.status === 'ACTIVE'">
+            {{ loanAccount.status }}
+          </span>
+        </div>
+
+        <div class="details-grid">
+
+          <div class="detail">
+            <label>Loan Account Number</label>
+            <strong>{{ loanAccount.loanAccountNo }}</strong>
+          </div>
+
+          <div class="detail">
+            <label>Loan Account ID</label>
+            <strong>{{ loanAccount.loanAccountId }}</strong>
+          </div>
+
+          <div class="detail">
+            <label>Deal ID</label>
+            <strong>{{ loanAccount.dealId }}</strong>
+          </div>
+
+          <div class="detail">
+            <label>Customer ID</label>
+            <strong>{{ loanAccount.customerId }}</strong>
+          </div>
+
+          <div class="detail">
+            <label>Loan Type</label>
+            <strong>{{ loanAccount.loanType }}</strong>
+          </div>
+
+          <div class="detail">
+            <label>Principal Amount</label>
+            <strong>
+              {{ loanAccount.loanAmount | currency:'INR':'symbol':'1.2-2' }}
+            </strong>
+          </div>
+
+          <div class="detail">
+            <label>Outstanding Amount</label>
+            <strong>
+              {{
+                loanAccount.outstandingAmount
+                  | currency:'INR':'symbol':'1.2-2'
+              }}
+            </strong>
+          </div>
+
+          <div class="detail">
+            <label>Interest Rate</label>
+            <strong>{{ loanAccount.interestRate }}%</strong>
+          </div>
+
+          <div class="detail">
+            <label>Tenure</label>
+            <strong>{{ loanAccount.tenureMonths }} Months</strong>
+          </div>
+
+          <div class="detail">
+            <label>Monthly EMI</label>
+            <strong>
+              {{ loanAccount.emiAmount | currency:'INR':'symbol':'1.2-2' }}
+            </strong>
+          </div>
+
+          <div class="detail">
+            <label>EMI Day</label>
+            <strong>{{ loanAccount.emiDay }}</strong>
+          </div>
+
+          <div class="detail">
+            <label>Created At</label>
+            <strong>
+              {{ loanAccount.createdAt | date:'dd MMM yyyy, hh:mm a' }}
+            </strong>
+          </div>
+
+        </div>
+      </section>
+    }
+
+  </div>
+</div>
+
+<!-- CREATE LOAN ACCOUNT MODAL -->
+@if (showCreateModal && loanDeal) {
+  <div
+    class="account-modal-overlay"
+    (click)="closeCreateModal()">
+
+    <section
+      class="account-modal-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="createAccountTitle"
+      (click)="$event.stopPropagation()">
+
+      <div class="account-modal-header">
+        <div>
+          <h3 id="createAccountTitle">Create Loan Account</h3>
+          <p>Confirm the disbursed loan details.</p>
+        </div>
+
+        <button
+          type="button"
+          class="close-icon"
+          aria-label="Close modal"
+          [disabled]="creating"
+          (click)="closeCreateModal()">
+          ✕
+        </button>
+      </div>
+
+      <div class="account-modal-body">
+
+        <div class="modal-note">
+          The account number will be generated automatically after confirmation.
+        </div>
+
+        <div class="modal-field">
+          <label>Deal ID</label>
+          <input type="text" [value]="loanDeal.dealId" readonly />
+        </div>
+
+        <div class="modal-field">
+          <label>Customer ID</label>
+          <input type="text" [value]="loanDeal.customerId" readonly />
+        </div>
+
+        <div class="modal-field">
+          <label>Loan Type</label>
+          <input
+            type="text"
+            [value]="loanDeal.loanType === 'HOME_LOAN' ? 'Home Loan' : 'Vehicle Loan'"
+            readonly
+          />
+        </div>
+
+        <div class="modal-field">
+          <label>Approved Loan Amount</label>
+          <input
+            type="text"
+            [value]="
+              (loanDeal.approvedAmount ?? loanDeal.requestedLoanAmount)
+                | currency:'INR':'symbol':'1.2-2'
+            "
+            readonly
+          />
+        </div>
+
+        <div class="modal-field">
+          <label>Tenure</label>
+          <input type="text" [value]="loanDeal.tenureMonths + ' Months'" readonly />
+        </div>
+
+        <div class="modal-field">
+          <label>Deal Status</label>
+          <input type="text" [value]="loanDeal.dealStatus" readonly />
+        </div>
+
+        @if (modalError) {
+          <div class="alert error">{{ modalError }}</div>
+        }
+      </div>
+
+      <div class="account-modal-footer">
+        <button
+          type="button"
+          class="reset-btn"
+          [disabled]="creating"
+          (click)="closeCreateModal()">
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="create-btn"
+          [disabled]="creating"
+          (click)="createLoanAccount()">
+          {{ creating ? 'Creating...' : 'Confirm & Create' }}
+        </button>
+      </div>
+    </section>
+  </div>
+}

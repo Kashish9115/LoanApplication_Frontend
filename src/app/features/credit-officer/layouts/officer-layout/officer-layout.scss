@@ -1,0 +1,94 @@
+
+.officer-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f3f6fb;
+}
+
+.officer-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0866df, #102747);
+  color: white;
+  overflow: hidden;
+  transition: width 0.25s;
+}
+
+.officer-sidebar.closed {
+  width: 0;
+}
+
+.sidebar-brand {
+  text-align: center;
+  padding: 35px 15px;
+
+  .brand-icon {
+    font-size: 42px;
+  }
+
+  h2 {
+    font-size: 24px;
+    margin-top: 10px;
+  }
+}
+
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+
+  a {
+    padding: 15px;
+    color: #e0ebfa;
+    text-decoration: none;
+    border-radius: 6px;
+    white-space: nowrap;
+
+    &:hover,
+    &.active {
+      background: #1265d4;
+      color: white;
+    }
+  }
+}
+
+.menu-heading {
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #b6ccec;
+  padding: 20px 15px 8px;
+}
+
+.main-section {
+  flex: 1;
+  min-width: 0;
+}
+
+.topbar {
+  height: 70px;
+  background: white;
+  padding: 0 25px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  button {
+    border: 0;
+    background: transparent;
+    font-size: 24px;
+    cursor: pointer;
+  }
+}
+
+.page-content {
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .officer-sidebar {
+    width: 210px;
+  }
+}

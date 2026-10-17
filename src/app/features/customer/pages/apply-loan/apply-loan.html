@@ -1,0 +1,322 @@
+
+<div class="apply-loan-page">
+
+  <div class="page-heading">
+    <h2>Apply Loan</h2>
+  </div>
+
+  <div class="application-container">
+
+    <!-- STEP 1: FETCH ELIGIBILITY -->
+    <div class="eligibility-section">
+
+      <div class="form-group">
+        <label for="customerId">Customer ID</label>
+
+        <input
+          id="customerId"
+          type="number"
+          name="customerId"
+          min="1"
+          [(ngModel)]="form.customerId"
+          placeholder="Enter Customer ID"
+        />
+      </div>
+
+      <button
+        type="button"
+        class="fetch-btn"
+        [disabled]="loading || submitting"
+        (click)="loadEligibility()">
+
+        {{ loading ? 'Loading...' : 'Fetch Eligibility' }}
+      </button>
+
+    </div>
+
+    @if (eligibility && scorecard) {
+      <div class="eligibility-result">
+        <p>
+          CIBIL Score:
+          <strong>{{ scorecard.cibilScore }}</strong>
+        </p>
+
+        <p>
+          Eligible Loan Amount:
+          <strong>
+            {{ eligibility.eligibleLoanAmount
+               | currency:'INR':'symbol':'1.0-0' }}
+          </strong>
+        </p>
+
+        <p>
+          Approval Type:
+          <strong>{{ scorecard.approvalType }}</strong>
+        </p>
+      </div>
+    }
+
+    <!-- LOAN APPLICATION FORM -->
+    <form
+      #loanForm="ngForm"
+      (ngSubmit)="submitLoan()">
+
+      <fieldset
+        class="loan-fields"
+        [disabled]="!eligibility?.eligible || !scorecard || submitting">
+
+        <!-- LOAN TYPE -->
+        <div class="form-group">
+
+          <label for="loanType">Loan Type</label>
+
+          <select
+            id="loanType"
+            name="loanType"
+            [(ngModel)]="form.loanType"
+            required>
+
+            <option value="HOME_LOAN">
+              Home Loan
+            </option>
+
+            <option value="VEHICLE_LOAN">
+              Vehicle Loan
+            </option>
+
+          </select>
+
+        </div>
+
+        <!-- LOAN AMOUNT -->
+        <div class="form-group">
+
+          <label for="loanAmount">Loan Amount</label>
+
+          <input
+            id="loanAmount"
+            type="number"
+            name="requestedLoanAmount"
+            [(ngModel)]="form.requestedLoanAmount"
+            min="1"
+            placeholder="0.00"
+            required
+          />
+
+          @if (
+            eligibility &&
+            form.requestedLoanAmount >
+            eligibility.eligibleLoanAmount
+          ) {
+            <small class="validation-error">
+              Amount cannot exceed
+              {{ eligibility.eligibleLoanAmount
+                 | currency:'INR':'symbol':'1.0-0' }}
+            </small>
+          }
+
+        </div>
+
+        <!-- TENURE -->
+        <div class="form-group">
+
+          <label for="tenure">Tenure Months</label>
+
+          <input
+            id="tenure"
+            type="number"
+            name="tenureMonths"
+            [(ngModel)]="form.tenureMonths"
+            min="1"
+            placeholder="Enter tenure in months"
+            required
+          />
+
+        </div>
+
+        <!-- INTEREST RATE -->
+        <div class="form-group">
+
+          <label for="interestRate">Interest Rate (%)</label>
+
+          <input
+            id="interestRate"
+            type="text"
+            value="Calculated after sanction"
+            readonly
+          />
+
+        </div>
+
+        <!-- EMI -->
+        <div class="form-group">
+
+          <label for="emiAmount">EMI Amount</label>
+
+          <input
+            id="emiAmount"
+            type="text"
+            value="Calculated after sanction"
+            readonly
+          />
+
+        </div>
+
+        <!-- BANK NAME -->
+        <div class="form-group">
+
+          <label for="bankName">Bank Name</label>
+
+          <input
+            id="bankName"
+            type="text"
+            name="bankName"
+            [(ngModel)]="form.bankName"
+            placeholder="Enter Bank Name"
+            required
+          />
+
+        </div>
+
+        <!-- BANK ACCOUNT -->
+        <div class="form-group">
+
+          <label for="bankAccountNumber">
+            Bank Account Number
+          </label>
+
+          <input
+            id="bankAccountNumber"
+            type="text"
+            name="bankAccountNumber"
+            [(ngModel)]="form.bankAccountNumber"
+            placeholder="Enter Bank Account Number"
+            required
+          />
+
+        </div>
+
+        <!-- ACCOUNT HOLDER -->
+        <div class="form-group">
+
+          <label for="accountHolderName">
+            Account Holder Name
+          </label>
+
+          <input
+            id="accountHolderName"
+            type="text"
+            name="accountHolderName"
+            [(ngModel)]="form.accountHolderName"
+            placeholder="Enter Account Holder Name"
+            required
+          />
+
+        </div>
+
+        <!-- IFSC -->
+        <div class="form-group">
+
+          <label for="ifscCode">IFSC Code</label>
+
+          <input
+            id="ifscCode"
+            type="text"
+            name="ifscCode"
+            [(ngModel)]="form.ifscCode"
+            placeholder="Enter IFSC Code"
+            required
+          />
+
+        </div>
+
+        <!-- EMI DAY -->
+        <div class="form-group">
+
+          <label for="emiDay">Select EMI Day</label>
+
+          <select
+            id="emiDay"
+            name="emiDay"
+            [(ngModel)]="form.emiDay"
+            required>
+
+            <option [ngValue]="5">5</option>
+            <option [ngValue]="7">7</option>
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="15">15</option>
+
+          </select>
+
+        </div>
+
+       
+
+        <!-- SUBMIT -->
+        <button
+          type="submit"
+          class="apply-btn"
+          [disabled]="
+            loanForm.invalid ||
+            !canApply ||
+            submitting
+          ">
+
+          {{ submitting ? 'Submitting...' : 'Apply Loan' }}
+
+        </button>
+
+      </fieldset>
+
+    </form>
+
+    <!-- MESSAGES -->
+    @if (errorMessage) {
+      <div class="error-message">
+        {{ errorMessage }}
+      </div>
+    }
+
+    @if (successMessage) {
+      <div class="success-message">
+        {{ successMessage }}
+      </div>
+    }
+
+    <!-- APPLICATION RESULT -->
+    @if (createdDeal) {
+
+      <div class="application-result">
+
+        <h3>Loan Application Submitted</h3>
+
+        <p>
+          Deal ID:
+          <strong>{{ createdDeal.dealId }}</strong>
+        </p>
+
+        <p>
+          Loan Type:
+          <strong>{{ createdDeal.loanType }}</strong>
+        </p>
+
+        <p>
+          Loan Amount:
+          <strong>
+            {{ createdDeal.requestedLoanAmount
+               | currency:'INR':'symbol':'1.0-0' }}
+          </strong>
+        </p>
+
+        <p>
+          Status:
+          <strong>{{ createdDeal.dealStatus }}</strong>
+        </p>
+
+      </div>
+
+    }
+
+  </div>
+
+</div>

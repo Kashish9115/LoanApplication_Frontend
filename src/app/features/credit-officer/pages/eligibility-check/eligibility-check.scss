@@ -1,0 +1,224 @@
+
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  color: #173153;
+}
+
+.eligibility-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 36px 34px 48px;
+  box-sizing: border-box;
+}
+
+.page-header {
+  margin-bottom: 30px;
+}
+
+.page-header h1 {
+  margin: 0 0 10px;
+  color: #173153;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.page-header p {
+  margin: 0;
+  color: #718096;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.eligibility-card,
+.result-card {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 32px;
+  background: #fff;
+  border: 1px solid #edf1f7;
+  border-radius: 16px;
+  box-shadow: 0 5px 18px rgb(23 49 83 / 5%);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 22px;
+}
+
+.form-group label {
+  display: block;
+  margin: 0;
+  color: #142b49;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.form-group input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 63px;
+  padding: 0 16px;
+  box-sizing: border-box;
+  color: #172b46;
+  background: #fff;
+  border: 1px solid #cbd7e7;
+  border-radius: 11px;
+  outline: none;
+  font: inherit;
+  font-size: 16px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus {
+  border-color: #0d6bdc;
+  box-shadow: 0 0 0 3px rgb(13 107 220 / 12%);
+}
+
+.form-group input:disabled {
+  background: #f5f7fa;
+  cursor: not-allowed;
+}
+
+.button-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.button-row button {
+  min-height: 58px;
+  padding: 0 26px;
+  border: none;
+  border-radius: 10px;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.primary-button {
+  flex: 1 1 240px;
+  color: #fff;
+  background: #0868d5;
+}
+
+.primary-button:hover:not(:disabled) {
+  background: #0757b5;
+}
+
+.secondary-button {
+  color: #fff;
+  background: #64748b;
+}
+
+.secondary-button:hover:not(:disabled) {
+  background: #475569;
+}
+
+.button-row button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.alert {
+  width: 100%;
+  margin-top: 24px;
+  padding: 18px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.alert-success {
+  color: #12643d;
+  background: #e6f7ee;
+  border: 1px solid #bce8ce;
+}
+
+.alert-error {
+  color: #b42318;
+  background: #fee4e2;
+  border: 1px solid #ffc9c5;
+}
+
+.result-card {
+  margin-top: 24px;
+}
+
+.result-card h2 {
+  margin: 0 0 22px;
+  font-size: 25px;
+  color: #173153;
+}
+
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 16px 0;
+  border-bottom: 1px solid #edf1f7;
+  font-size: 16px;
+}
+
+.result-row:last-child {
+  border-bottom: none;
+}
+
+.result-row span {
+  color: #718096;
+}
+
+.result-row strong {
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 768px) {
+  .eligibility-page {
+    padding: 24px 16px 32px;
+  }
+
+  .page-header h1 {
+    font-size: 27px;
+  }
+
+  .eligibility-card,
+  .result-card {
+    padding: 22px 18px;
+  }
+
+  .form-group input {
+    height: 56px;
+  }
+
+  .button-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .button-row button {
+    width: 100%;
+  }
+
+  .result-row {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .result-row strong {
+    text-align: left;
+  }
+}
