@@ -1,0 +1,96 @@
+<main class="penalty-page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">LOAN SERVICING</p>
+      <h1>Penalty & Late Fee Management</h1>
+      <p class="subtitle">Review bounce charges, late fees and penalty status for a loan account.</p>
+    </div>
+    <label class="account-control">Loan account ID <input type="number" min="1" step="1" [(ngModel)]="loanAccountId"
+        (keyup.enter)="loadAccount()"></label>
+    <button class="btn-primary" type="button" (click)="loadAccount()" [disabled]="loading">Load account</button>
+  </header>
+
+  <div class="alert success" *ngIf="successMessage" role="status">{{ successMessage }}</div>
+  <div class="alert error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+
+  <section class="summary-grid">
+    <article class="summary-card"><span>Applied penalties on this page</span><strong>{{ appliedCount
+        }}</strong><small>Awaiting payment or review</small></article>
+    <article class="summary-card blue"><span>Applied amount on this page</span><strong>{{ totalAmount |
+        currency:'INR':'symbol':'1.2-2' }}</strong><small>Only APPLIED charges included</small></article>
+    <article class="summary-card green"><span>Paid</span><strong>{{ paidCount }}</strong><small>Charges marked
+        paid</small></article>
+    <article class="summary-card amber"><span>Waived</span><strong>{{ waivedCount }}</strong><small>Charges marked
+        waived</small></article>
+  </section>
+
+  <section class="panel">
+    <div class="panel-heading">
+      <div>
+        <h2>Penalty ledger</h2>
+        <p>{{ totalElements }} total records · page {{ currentPage + 1 }} of {{ totalPages || 1 }}</p>
+      </div><button type="button" class="btn-secondary" (click)="loadPenalties()" [disabled]="loading">Refresh</button>
+    </div>
+    <div class="loading" *ngIf="loading">Loading penalty records…</div>
+    <div class="empty" *ngIf="!loading && !errorMessage && penalties.length===0">No penalty charges found for this loan
+      account.</div>
+    <div class="table-wrap" *ngIf="penalties.length">
+      <table>
+        <thead>
+          <tr>
+            <th>Penalty ID</th>
+            <th>EMI schedule ID</th>
+            <th>Created date</th>
+            <th>Reason</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let penalty of penalties">
+            <td>#{{ penalty.penaltyChargeId }}</td>
+            <td>#{{ penalty.emiScheduleId }}</td>
+            <td>{{ formatDate(penalty.createdAt) }}</td>
+            <td class="reason">{{ penalty.reason || 'Late payment charge' }}</td>
+            <td class="amount">{{ penalty.penaltyAmount | currency:'INR':'symbol':'1.2-2' }}</td>
+            <td><span class="status" [ngClass]="status(penalty).toLowerCase()">{{ status(penalty) }}</span></td>
+            <td><button class="btn-waive" type="button" *ngIf="status(penalty)==='APPLIED'"
+                (click)="openWaiver(penalty)">Request waiver</button><span class="muted"
+                *ngIf="status(penalty)!=='APPLIED'">—</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <footer class="pagination" *ngIf="totalPages > 1"><span>{{ totalElements }} records</span>
+      <div><button type="button" (click)="changePage(currentPage-1)"
+          [disabled]="loading || currentPage<=0">Previous</button><span>Page {{ currentPage+1 }} of {{ totalPages
+          }}</span><button type="button" (click)="changePage(currentPage+1)"
+          [disabled]="loading || currentPage>=totalPages-1">Next</button></div>
+    </footer>
+  </section>
+
+  <div class="modal-backdrop" *ngIf="selectedPenalty" (click)="closeWaiver()">
+    <section class="waiver-modal" role="dialog" aria-modal="true" aria-labelledby="waiver-title"
+      (click)="$event.stopPropagation()">
+      <header>
+        <div>
+          <p class="eyebrow">PENALTY REVIEW</p>
+          <h2 id="waiver-title">Request penalty waiver</h2>
+        </div><button type="button" class="close" (click)="closeWaiver()" [disabled]="waiverLoading">×</button>
+      </header>
+      <div class="detail"><span>Penalty #{{ selectedPenalty.penaltyChargeId }}</span><strong>{{
+          selectedPenalty.penaltyAmount | currency:'INR':'symbol':'1.2-2' }}</strong><small>{{ selectedPenalty.reason
+          }}</small></div>
+      <label class="reason-label">Reason for waiver request<textarea [(ngModel)]="waiverReason" rows="4"
+          maxlength="1000" placeholder="Explain why this penalty should be waived…"></textarea></label>
+      <p class="hint">Submitting a request does not automatically waive a charge. The backend must review and persist
+        the decision.</p>
+      <div class="alert error" *ngIf="waiverError">{{ waiverError }}</div>
+      <footer><button class="btn-secondary" type="button" (click)="closeWaiver()"
+          [disabled]="waiverLoading">Cancel</button><button class="btn-primary" type="button" (click)="submitWaiver()"
+          [disabled]="waiverLoading || waiverReason.trim().length<5">{{ waiverLoading ? 'Submitting…' : 'Submit waiver
+          request' }}</button></footer>
+    </section>
+  </div>
+</main>

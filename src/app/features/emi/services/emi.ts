@@ -3,53 +3,46 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { timeout } from 'rxjs';
 
-
-
-
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class Emi {
+  private emiUrl = `${environment.apiUrl}/api/emi`;
+  private paymentUrl = `${environment.apiUrl}/api/payments`;
 
- 
- private  apiUrl = `${environment.apiUrl}/api/emi`;
+  constructor(private http: HttpClient) {}
 
- constructor(private http:HttpClient){}
-
-  
-  // getSchedule(loanAccountId: number, page = 0, size = 10) {
-  //   return this.http.get<any>(
-  //     `${this.apiUrl}/getuseremi/account/${loanAccountId}`,
-  //     { params: { page, size } }
-  //   ).pipe(timeout(15000));
-  // }
-
-  getSchedule(
-  loanAccountId: number,
-  page: number = 0,
-  size: number = 10
-) {
-  return this.http.get<any>(
-    `${this.apiUrl}/getuseremi/account/${loanAccountId}?page=${page}&size=${size}`
-  );
-}
-
-   getBreakdown(emiScheduleId: number) {
-    return this.http.get<any>(
-      `${this.apiUrl}/breakdown/${emiScheduleId}`
-    );
+  getSchedule(loanAccountId: number, page = 0, size = 10) {
+    return this.http.get<any>(`${this.emiUrl}/getuseremi/account/${loanAccountId}`, {
+      params: { page, size }
+    }).pipe(timeout(20000));
   }
 
-
-
-generateSchedule(loanAccountId: number) {
-    return this.http.post<any>(
-      `${this.apiUrl}/generate/${loanAccountId}`,
-      {}
-    );
+  getBreakdown(emiScheduleId: number) {
+    return this.http.get<any>(`${this.emiUrl}/breakdown/${emiScheduleId}`).pipe(timeout(20000));
   }
 
+  getOverdueBreakdown(loanAccountId: number) {
+    return this.http.get<any>(`${this.emiUrl}/loan-account/${loanAccountId}/overdue-breakdown`).pipe(timeout(20000));
+  }
 
- 
+  createOrder(emiScheduleId: number) {
+    return this.http.post<any>(`${this.paymentUrl}/create-order/${emiScheduleId}`, {}).pipe(timeout(20000));
+  }
 
+  createOverdueOrder(loanAccountId: number) {
+    return this.http.post<any>(`${this.paymentUrl}/create-order/overdueemis/${loanAccountId}`, {}).pipe(timeout(20000));
+  }
+
+  verifyAndPay(payload: any) {
+    return this.http.post<any>(`${this.paymentUrl}/verify-and-pay`, payload).pipe(timeout(20000));
+  }
+
+  getPaymentHistory(loanAccountId: number, page = 0, size = 10) {
+    return this.http.get<any>(`${this.paymentUrl}/history/customer/${loanAccountId}`, {
+      params: { page, size }
+    }).pipe(timeout(20000));
+  }
+
+  generateSchedule(loanAccountId: number) {
+    return this.http.post<any>(`${this.emiUrl}/generate/${loanAccountId}`, {});
+  }
 }

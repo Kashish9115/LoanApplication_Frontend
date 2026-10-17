@@ -22,6 +22,12 @@ export const routes: Routes = [
       import('./features/emi/pages/emi-schedule/emi-schedule')
         .then(m => m.EmiSchedule)
   },
+  {
+    path: 'penalties',
+    loadComponent: () =>
+      import('./features/penalties/pages/penalty-management/penalty-management')
+        .then(m => m.PenaltyManagement)
+  },
 
 
 
