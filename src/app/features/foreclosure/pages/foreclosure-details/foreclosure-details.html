@@ -1,0 +1,128 @@
+
+<div class="details-page">
+  <a routerLink="/foreclosure-requests" class="back-link">
+    ← Back to Requests
+  </a>
+
+  <div class="page-heading">
+    <div>
+      <h1>Foreclosure Request Details</h1>
+      <p>Review the request and make a decision.</p>
+    </div>
+
+    <span
+      *ngIf="request"
+      class="status-badge"
+      [ngClass]="request.status.toLowerCase()">
+      {{ request.status }}
+    </span>
+  </div>
+
+  <div *ngIf="loading" class="info-message">
+    Loading request details...
+  </div>
+
+  <div *ngIf="errorMessage" class="alert error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="successMessage" class="alert success">
+    {{ successMessage }}
+  </div>
+
+  <ng-container *ngIf="request && !loading">
+
+    <section class="details-card">
+      <h2>Loan &amp; Customer Details</h2>
+
+      <div class="details-grid">
+        <div class="detail">
+          <label>Request ID</label>
+          <strong>#{{ request.requestId }}</strong>
+        </div>
+
+        <div class="detail">
+          <label>Loan Account Number</label>
+          <strong>#{{ request.loanAccountNo || request.loanAccountId }}</strong>
+        </div>
+
+       <div class="detail">
+  <label>Request ID</label>
+  <strong>{{ request.requestId }}</strong>
+</div>
+
+<div class="detail">
+  <label>Loan Account Number</label>
+  <strong>
+    {{ request.loanAccountNo || request.loanAccountId }}
+  </strong>
+</div>
+
+<div class="detail">
+  <label>Customer Name</label>
+  <strong>{{ request.customerName || 'Not available' }}</strong>
+</div>
+
+<div class="detail">
+  <label>Request Date</label>
+  <strong>
+    {{ request.requestedDate
+      ? (request.requestedDate | date:'dd MMM yyyy, hh:mm a')
+      : 'Not available' }}
+  </strong>
+</div>
+
+<div class="detail">
+  <label>Foreclosure Amount</label>
+  <strong class="amount">
+    {{ request.foreClosureAmount
+      | currency:'INR':'symbol':'1.2-2' }}
+  </strong>
+</div>
+
+        <div class="detail">
+          <label>Expected Closure Date</label>
+          <strong>
+           # {{ request.expectedClosureDate
+              ? (request.expectedClosureDate | date:'dd MMM yyyy')
+              : 'Not available' }}
+          </strong>
+        </div>
+
+        <div class="detail">
+          <label>Current Status</label>
+          <strong>#{{ request.status }}</strong>
+        </div>
+      </div>
+
+      <div class="customer-note">
+        <h3>#Customer Note</h3>
+        <p>{{ request.reason || 'No customer note provided.' }}</p>
+      </div>
+
+      <div class="actions" *ngIf="request.status === 'PENDING'">
+        <button
+          type="button"
+          class="reject-btn"
+          (click)="rejectRequest()"
+          [disabled]="actionLoading">
+          {{ actionLoading ? 'Please wait...' : 'Reject Request' }}
+        </button>
+
+        <button
+          type="button"
+          class="approve-btn"
+          (click)="approveRequest()"
+          [disabled]="actionLoading">
+          {{ actionLoading ? 'Please wait...' : '✓ Approve Request' }}
+        </button>
+      </div>
+
+      <div class="processed-message" *ngIf="request.status !== 'PENDING'">
+        This request has been {{ request.status.toLowerCase() }}.
+        No further action is available.
+      </div>
+    </section>
+
+  </ng-container>
+</div>

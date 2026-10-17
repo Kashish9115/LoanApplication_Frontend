@@ -1,13 +1,12 @@
 import { TestBed } from '@angular/core/testing';
+import { Cibilscore } from './cibilscore';
 
-import { AuthApi } from './auth-api';
-
-describe('AuthApi', () => {
-  let service: AuthApi;
+describe('Cibilscore', () => {
+  let service: Cibilscore;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(AuthApi);
+    service = TestBed.inject(Cibilscore);
   });
 
   it('should be created', () => {

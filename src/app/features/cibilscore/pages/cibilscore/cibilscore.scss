@@ -1,0 +1,251 @@
+
+:host {
+  display: block;
+  color: #1f2937;
+}
+
+.cibil-page {
+  padding: 28px;
+  background: #f5f7fb;
+  min-height: 100%;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.heading-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  background: #e8efff;
+  border-radius: 12px;
+  font-size: 24px;
+}
+
+h1 {
+  font-size: 26px;
+  margin: 0;
+  font-weight: 700;
+}
+
+.heading p,
+.subtitle {
+  margin: 6px 0 0;
+  color: #7b8495;
+  font-size: 14px;
+}
+
+.check-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.check-btn:hover {
+  background: #1d4ed8;
+}
+
+.check-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.customer-card,
+.score-card {
+  background: #fff;
+  border: 1px solid #e7ebf2;
+  border-radius: 14px;
+  box-shadow: 0 3px 12px rgba(31, 41, 55, 0.04);
+}
+
+.customer-card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  padding: 20px 24px;
+  margin-bottom: 22px;
+}
+
+.customer-info,
+.date-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 12px;
+  color: #7b8495;
+}
+
+.customer-info strong,
+.date-box strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.score-card {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 30px;
+  text-align: center;
+}
+
+.score-card h2 {
+  font-size: 22px;
+  margin: 0;
+}
+
+.gauge {
+  width: 100%;
+  max-width: 360px;
+  margin: 18px auto 0;
+}
+
+.gauge-svg {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+
+.score-value {
+  font-size: 42px;
+  line-height: 1.1;
+  font-weight: 800;
+  color: #1f2937;
+  margin-top: -4px;
+}
+
+.score-label {
+  display: inline-block;
+  margin-top: 10px;
+  background: #e6f7ed;
+  color: #168348;
+  border-radius: 20px;
+  padding: 7px 18px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.report-status {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 22px 0;
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 16px;
+  background: #eef2f7;
+  color: #475467;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status-badge.completed {
+  background: #e6f7ed;
+  color: #168348;
+}
+
+.status-badge.pending {
+  background: #fff4d6;
+  color: #946200;
+}
+
+.status-badge.failed {
+  background: #fee4e2;
+  color: #b42318;
+}
+
+.last-checked {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 18px;
+  border-top: 1px solid #edf0f5;
+  padding-top: 22px;
+}
+
+.date-box {
+  min-width: 190px;
+  text-align: left;
+  padding: 15px;
+  background: #f8fafc;
+  border-radius: 9px;
+}
+
+.message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.success {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.error {
+  color: #b42318;
+  background: #fee4e2;
+}
+
+.loading {
+  text-align: center;
+  padding: 18px;
+  color: #475467;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  background: white;
+  border-radius: 12px;
+  color: #667085;
+}
+
+@media (max-width: 600px) {
+  .cibil-page {
+    padding: 16px;
+  }
+
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .check-btn {
+    width: 100%;
+  }
+
+  .score-card {
+    padding: 20px 14px;
+  }
+
+  .customer-card {
+    gap: 20px;
+  }
+
+  .date-box {
+    width: 100%;
+  }
+}

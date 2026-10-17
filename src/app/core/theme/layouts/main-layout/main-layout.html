@@ -1,1 +1,32 @@
+
 <p>main-layout works!</p>
+
+<!-- CIBIL Score -->
+<a
+  routerLink="/cibilscore"
+  routerLinkActive="active"
+  [routerLinkActiveOptions]="{ exact: true }">
+  <i class="bi bi-speedometer2"></i>
+  <span>CIBIL Score</span>
+</a>
+
+<!-- Foreclosure Request -->
+<a
+  routerLink="/foreclosure-request"
+  routerLinkActive="active"
+  [routerLinkActiveOptions]="{ exact: true }">
+  <i class="bi bi-file-earmark-text"></i>
+  <span>Foreclosure Request</span>
+</a>
+
+<!-- My Closure List -->
+<a
+  routerLink="/my-closure-list"
+  routerLinkActive="active"
+  [routerLinkActiveOptions]="{ exact: true }">
+  <i class="bi bi-list-check"></i>
+  <span>My Closure List</span>
+</a>
+
+<!-- Page content -->
+<router-outlet></router-outlet>

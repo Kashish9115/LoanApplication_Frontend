@@ -1,0 +1,127 @@
+<div class="foreclosure-page">
+  <h2>Foreclosure Request</h2>
+  <p>Manage your loan closure request.</p>
+
+  <div class="message success" *ngIf="successMessage">
+    {{ successMessage }}
+  </div>
+
+  <div class="message error" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <section class="card">
+    <h3>Loan Account Details</h3>
+
+    <div class="form-group">
+      <label>Select Loan Account</label>
+      <select
+        [(ngModel)]="selectedLoanId"
+        (ngModelChange)="onLoanChange()"
+      >
+        <option [ngValue]="null">Select loan account</option>
+        <option *ngFor="let id of loanAccounts" [ngValue]="id">
+          Loan ID: {{ id }}
+        </option>
+      </select>
+    </div>
+
+    <div class="loan-details" *ngIf="loanDetails">
+
+  <div>
+    <span>Customer ID</span>
+    <strong>{{ loanDetails.customerId }}</strong>
+  </div>
+
+  <div>
+    <span>Loan Account Number</span>
+    <strong>{{ loanDetails.loanAccountNo }}</strong>
+  </div>
+
+  <div>
+    <span>Outstanding Principal</span>
+    <strong>
+      ₹{{ loanDetails.outstandingAmount }}
+    </strong>
+  </div>
+
+  <div>
+    <span>Next EMI Date</span>
+    <strong>
+      {{ loanDetails.nextEmiDate | date:'dd MMM yyyy' }}
+    </strong>
+  </div>
+
+</div>
+  </section>
+
+  <section class="card">
+    <h3>Select Foreclosure Type</h3>
+
+    <div class="type-options">
+      <label>
+        <input type="radio" name="type" [(ngModel)]="closureType"
+          value="FULL">
+        Full Foreclosure
+      </label>
+
+      <label>
+        <input type="radio" name="type" [(ngModel)]="closureType"
+          value="PARTIAL">
+        Partial Foreclosure
+      </label>
+    </div>
+
+    <div class="form-group" *ngIf="closureType === 'PARTIAL'">
+      <label>Number of Months</label>
+      <input type="number" [(ngModel)]="months" min="1"
+        placeholder="Enter number of months">
+    </div>
+
+    <div class="form-group">
+      <label>Expected Closure Date</label>
+      <input type="date" [(ngModel)]="expectedClosureDate"
+        [min]="today()">
+    </div>
+
+    <div class="form-group">
+      <label>Reason / Notes</label>
+      <textarea [(ngModel)]="reason" rows="3"
+        placeholder="Enter foreclosure reason"></textarea>
+    </div>
+
+    <button class="submit-btn" (click)="submitRequest()"
+      [disabled]="loading">
+      {{ loading ? 'Submitting...' : 'Submit Request' }}
+    </button>
+  </section>
+
+  <section class="card">
+    <h3>My Foreclosure Requests</h3>
+
+    <table *ngIf="requests.length > 0">
+      <thead>
+        <tr>
+          <th>Request ID</th>
+          <th>Loan Account</th>
+          <th>Type</th>
+          <th>Amount</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of requests">
+          <td>{{ r.requestId }}</td>
+          <td>{{ r.loanAccountNo }}</td>
+          <td>{{ r.foreClosureType }}</td>
+          <td>₹{{ r.foreClosureAmount }}</td>
+          <td>{{ r.status }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p *ngIf="requests.length === 0">
+      No foreclosure requests found.
+    </p>
+  </section>
+</div>

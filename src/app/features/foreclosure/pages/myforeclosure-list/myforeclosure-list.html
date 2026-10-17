@@ -1,0 +1,158 @@
+
+<div class="closure-page">
+  <div class="page-header">
+    <div>
+      <h1>My Closure List</h1>
+      <p>View and manage your foreclosure requests</p>
+    </div>
+
+    <button class="refresh-btn" (click)="loadRequests()" [disabled]="loading">
+      {{ loading ? 'Loading...' : '↻ Refresh' }}
+    </button>
+  </div>
+
+  <div class="search-box">
+   <input
+  type="text"
+  placeholder="Search requests..."
+  [(ngModel)]="searchText"
+  (ngModelChange)="onSearchChange()"
+/>
+  </div>
+
+  <div class="message error" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <div class="loading" *ngIf="loading">
+    Loading closure requests...
+  </div>
+
+
+  <div class="table-card" *ngIf="!loading">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Request ID</th>
+            <th>Loan Account</th>
+            <th>Customer Name</th>
+            <th>Request Date</th>
+            <th>Outstanding Principal</th>
+            <th>Foreclosure Amount</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+               <tr *ngFor="let request of requests">
+           <td>{{ request.requestId ?? request.id ?? '—' }}</td>
+            <td>{{ request.loanAccountNo ?? request.loanAccountId ?? '—' }}</td>
+            <td>{{ request.customerName ?? '—' }}</td>
+            <td>
+  {{ request.requestedDate
+    ? (request.requestedDate | date:'dd MMM yyyy')
+    : '—' }}
+</td>
+            <td>
+              {{ request.outstandingPrincipal != null
+                ? (request.outstandingPrincipal | currency:'INR':'symbol':'1.0-2')
+                : '—' }}
+            </td>
+            <td>
+  {{ request.foreClosureAmount != null
+    ? (request.foreClosureAmount | currency:'INR':'symbol':'1.0-2')
+    : '—' }}
+</td>
+            <td>
+              <span class="status-badge" [ngClass]="statusClass(request.status)">
+                {{ request.status ?? 'UNKNOWN' }}
+              </span>
+            </td>
+            <td>
+              <a
+  [routerLink]="['/foreclosure-details']"
+  [queryParams]="{ requestId: request.requestId }">
+   <button
+                type="button"
+                class="view-btn"
+                (click)="viewRequest(request)">
+                View
+              </button>
+</a>
+
+            </td>
+          </tr>
+
+          <tr *ngIf="filteredRequests.length === 0">
+            <td colspan="8" class="empty-state">
+              No closure requests found.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination" *ngIf="totalElements > 0">
+  <span>
+    Total Records: {{ totalElements }}
+  </span>
+
+  <div class="pagination-controls">
+    <button
+      type="button"
+      (click)="previousPage()"
+      [disabled]="currentPage === 0 || loading">
+      Previous
+    </button>
+
+    <span>
+      Page {{ currentPage + 1 }} of {{ totalPages }}
+    </span>
+
+    <button
+      type="button"
+      (click)="nextPage()"
+      [disabled]="currentPage >= totalPages - 1 || loading">
+      Next
+       </button>
+     </div>
+     </div>
+     <nav aria-label="Page navigation" class="mt-3"
+     *ngIf="totalPages > 0">
+  <ul class="pagination justify-content-end">
+
+    <li class="page-item" [class.disabled]="currentPage === 0">
+      <button class="page-link"
+              type="button"
+              [disabled]="currentPage === 0 || loading"
+              (click)="previousPage()">
+        Previous
+      </button>
+    </li>
+
+    <li class="page-item"
+        *ngFor="let page of [].constructor(totalPages); let i = index"
+        [class.active]="currentPage === i">
+      <button class="page-link"
+              type="button"
+              [disabled]="loading"
+              (click)="goToPage(i)">
+        {{ i + 1 }}
+      </button>
+    </li>
+
+    <li class="page-item"
+        [class.disabled]="currentPage >= totalPages - 1">
+      <button class="page-link"
+              type="button"
+              [disabled]="currentPage >= totalPages - 1 || loading"
+              (click)="nextPage()">
+        Next
+      </button>
+    </li>
+
+  </ul>
+</nav>
+  </div>
+</div>
